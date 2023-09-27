@@ -9,6 +9,7 @@ import math
 # Akun USK untuk Login
 NIM = 'NIM-Kamu'
 PASS = 'PASS-Kamu'
+MAX_WAIT_TIME = 20 # waktu tunggu maksimal dalam seconds
 
 # Inisialisasi variabel status untuk flow dependency
 status = True
@@ -16,7 +17,7 @@ status = True
 def click_by_css(css_selector, label):
     global status # menggunakan variable status mejadi global
     try:
-        WebDriverWait(driver, 10).until(
+        WebDriverWait(driver, MAX_WAIT_TIME).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
         ).click()
         print(f"Tombol '{label}' di klik")
@@ -27,7 +28,7 @@ def click_by_css(css_selector, label):
 # Fungsi untuk mengisi teks pada kolom berdasarkan atribut name dan nilainya 
 def fill_text_by_name(value_of_name, text_to_fill):
     try:
-        elemen = WebDriverWait(driver, 10).until(
+        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
             EC.presence_of_element_located((By.NAME, value_of_name))
         )
         elemen.clear()
@@ -38,7 +39,7 @@ def fill_text_by_name(value_of_name, text_to_fill):
 # Fungsi untuk mencetak teks dari elemen dengan selector CSS
 def print_text_by_css(css_selector, message=""):
     try:
-        elemen = WebDriverWait(driver, 10).until(
+        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         )
         teks_elemen = elemen.text
@@ -49,7 +50,7 @@ def print_text_by_css(css_selector, message=""):
 # Fungsi untuk mencetak teks dari elemen dengan selector CSS
 def get_text_by_css(css_selector):
     try:
-        elemen = WebDriverWait(driver, 10).until(
+        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         )
         text = elemen.text
@@ -64,6 +65,11 @@ def go_to_url(url):
     driver.get(url)
     #printing the target website url and title
     print(f"Membuka '{driver.current_url}' ")
+
+# Fungsi untuk keluar program
+def exit_program(message=""):
+    print(message, "Exiting the program...")
+    exit(1)
 
 # the target website 
 url_login = "https://simkuliah.usk.ac.id/index.php/login" 
@@ -84,9 +90,9 @@ nama_akun = "#pcoded > div.pcoded-container.navbar-wrapper > nav > div > div.nav
 check_absen = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div > div:nth-child(1) > div > div > p"
 
 # using Firefox headless webdriver to secure connection to Firefox 
-with webdriver.Firefox(options=options) as driver: 
-    go_to_url(url_login)  # pergi ke halaman login
+with webdriver.Firefox(options=options) as driver:
 
+    go_to_url(url_login)  # pergi ke halaman login
     # Mengisi username, password and signin elements
     fill_text_by_name("username", NIM)
     fill_text_by_name("password", PASS)
@@ -94,6 +100,14 @@ with webdriver.Firefox(options=options) as driver:
     # Flow click tombol
     if status:
         click_by_css(login, "Login")
+
+        # Cek apakah NIM dan PASSWORD valid
+        error_alert = get_text_by_css("body > section > div > div > div > div.login-card.card-block.auth-body > form > div.auth-box > div.alert.alert-danger.icons-alert")
+        if error_alert:
+            print(error_alert)
+            exit_program()
+
+        # Jika berhasil masuk
         nama = get_text_by_css(nama_akun)
         if nama:
             length = 6 + len(nama)
@@ -106,12 +120,11 @@ with webdriver.Firefox(options=options) as driver:
         check = get_text_by_css(check_absen)
 
         #Jika absen belum tersedia maka program berhenti
-        if (check[0].lower() == 'b'):
+        if check:
             print(check, "coba lagi nanti")
-            print("Exiting the program...")
-            exit(1)
-    # if status: click_by_css(hadir, "Hadir")
-    # if status: click_by_css(konfirmasi, "Konfirmasi")
+            exit_program()    
+        # if status: click_by_css(hadir, "Hadir")
+        # if status: click_by_css(konfirmasi, "Konfirmasi")
 
     driver.close()
 
