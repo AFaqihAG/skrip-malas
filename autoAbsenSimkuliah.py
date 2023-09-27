@@ -1,0 +1,118 @@
+from selenium import webdriver 
+from selenium.webdriver.firefox.options import Options 
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import math
+
+# Akun USK untuk Login
+NIM = 'NIM-Kamu'
+PASS = 'PASS-Kamu'
+
+# Inisialisasi variabel status untuk flow dependency
+status = True
+# Fungsi untuk mengklik elemen by CSS SELECTOR setelah menunggu
+def click_by_css(css_selector, label):
+    global status # menggunakan variable status mejadi global
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
+        ).click()
+        print(f"Tombol '{label}' di klik")
+    except TimeoutException:
+        print(f"Tombol '{label}' tidak ditemukan atau tidak dapat diklik.")
+        status = False # Set status menjadi false jika tombol gagal di klik
+
+# Fungsi untuk mengisi teks pada kolom berdasarkan atribut name dan nilainya 
+def fill_text_by_name(value_of_name, text_to_fill):
+    try:
+        elemen = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, value_of_name))
+        )
+        elemen.clear()
+        elemen.send_keys(text_to_fill)
+    except TimeoutException:
+        print(f"Elemen dengan atribut '{atribut}'='{nilai}' tidak ditemukan atau tidak dapat diisi.")
+
+# Fungsi untuk mencetak teks dari elemen dengan selector CSS
+def print_text_by_css(css_selector, message=""):
+    try:
+        elemen = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+        )
+        teks_elemen = elemen.text
+        print(f"{message}{teks_elemen}")
+    except TimeoutException:
+        print(f"'{css_selector}' tidak ditemukan.")
+
+# Fungsi untuk mencetak teks dari elemen dengan selector CSS
+def get_text_by_css(css_selector):
+    try:
+        elemen = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+        )
+        text = elemen.text
+        return text
+    except TimeoutException:
+        print(f"'{css_selector}' tidak ditemukan.")
+        return None
+
+# Fungsi untuk membuka atau pindah url baru
+def go_to_url(url):
+    # opening the target website in the browser 
+    driver.get(url)
+    #printing the target website url and title
+    print(f"Membuka '{driver.current_url}' ")
+
+# the target website 
+url_login = "https://simkuliah.usk.ac.id/index.php/login" 
+url_absensi = "https://simkuliah.usk.ac.id/index.php/absensi"
+
+# the interface for turning on headless mode 
+options = Options() 
+options.add_argument("-headless") 
+
+# Inisialisasi Elemen
+# cara : inspect element web pages, get the button or text field, right click, copy, choose css selector or xpath or whatever you want.
+login = "div.row:nth-child(5) > div:nth-child(1) > button:nth-child(1)"  #css selector
+# absensi = ".pcoded-item > li:nth-child(2) > a:nth-child(1) > span:nth-child(2)"   #css selector
+absensi = "a[href='https://simkuliah.usk.ac.id/index.php/absensi']"
+hadir = "#konfirmasi-kehadiran" #css selector
+konfirmasi = ".confirm" #css selector
+nama_akun = "#pcoded > div.pcoded-container.navbar-wrapper > nav > div > div.navbar-container.container-fluid > div > ul.nav-right > li.user-profile.header-notification > a > span"
+check_absen = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div > div:nth-child(1) > div > div > p"
+
+# using Firefox headless webdriver to secure connection to Firefox 
+with webdriver.Firefox(options=options) as driver: 
+    go_to_url(url_login)  # pergi ke halaman login
+
+    # Mengisi username, password and signin elements
+    fill_text_by_name("username", NIM)
+    fill_text_by_name("password", PASS)
+    
+    # Flow click tombol
+    if status:
+        click_by_css(login, "Login")
+        nama = get_text_by_css(nama_akun)
+        if nama:
+            length = 6 + len(nama)
+            print("Login Berhasil!")
+            print('-'* math.ceil((length-6)/2) ,"INFO", '-'* math.ceil((length-6)/2) )
+            print("Nama:",nama)
+            print('-'*(length+1))
+    if status: 
+        go_to_url(url_absensi)  #   pergi ke halaman absensi
+        check = get_text_by_css(check_absen)
+
+        #Jika absen belum tersedia maka program berhenti
+        if (check[0].lower() == 'b'):
+            print(check, "coba lagi nanti")
+            print("Exiting the program...")
+            exit(1)
+    # if status: click_by_css(hadir, "Hadir")
+    # if status: click_by_css(konfirmasi, "Konfirmasi")
+
+    driver.close()
+
+
