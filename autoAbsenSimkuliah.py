@@ -68,9 +68,9 @@ def go_to_url(url):
     print(f"Membuka '{driver.current_url}' ")
 
 # Fungsi untuk keluar program
-def exit_program(message=""):
-    print(message, "Exiting the program...")
-    exit(1)
+def exit_program(message):
+    print(message, "Exiting..")
+    exit()
 
 # Fungsi untuk memeriksa koneksi internet
 def is_internet_available(url="https://google.com"):
@@ -84,6 +84,7 @@ def is_internet_available(url="https://google.com"):
 # the target website 
 url_login = "https://simkuliah.usk.ac.id/index.php/login" 
 url_absensi = "https://simkuliah.usk.ac.id/index.php/absensi"
+
 
 # the interface for turning on headless mode 
 options = Options() 
@@ -122,10 +123,10 @@ try:
                 if nama:
                     length = 6 + len(nama)
                     print("Login Berhasil!")
-                    print('-'* math.ceil((length-6)/2) ,"INFO", '-'* math.ceil((length-6)/2) )
+                    print('='* math.ceil((length-6)/2) ,"INFO", '='* math.ceil((length-6)/2) )
                     print("Nama:",nama)
                     print("NIM:",NIM)
-                    print('-'*(length+1))
+                    print('='*(length+1))
                     
                     # Flow pergi ke halaman absensi 
                     go_to_url(url_absensi)  # pergi ke halaman absensi
@@ -133,8 +134,7 @@ try:
     
                     # Jika absen belum tersedia maka program berhenti
                     if check:
-                        print(check, "coba lagi nanti")
-                        exit_program()    
+                        exit_program(check)    
                     else:
                         mataKuliah = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
                         if mataKuliah:
@@ -148,13 +148,13 @@ try:
                     # Menampilkan kesalahan jika username atau pass salah
                     if NIM and PASS:    
                         error_alert = get_text_by_css(valid_alert)
-                        print(error_alert)
+                        exit_program(error_alert)
 
-                    print("Gagal login, coba lagi!")
-                    exit_program()
+                    exit_program("Gagal login!")
         
                 driver.close()
     else:
         print("Gagal Terhubung. Coba lagi nanti.")
+        exit_program(gagal)
 except WebDriverException as e:
     print("Terjadi kesalahan:", str(e))

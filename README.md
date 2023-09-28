@@ -3,7 +3,7 @@
 ### autoAbsenSimkuliah.py
 ```
 requirements : 
-- python selenium (tested on 4.13.0)
+- python selenium (tested on 4.13.0 Arch Linux, 4.9.1 Termux)
 - geckodriver
 
 Pastikan ubah nilai variable NIM dan PASS yang valid di dalam skrip sebelum di jalankan.
