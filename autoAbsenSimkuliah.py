@@ -9,8 +9,8 @@ import math
 import requests
 
 # Akun USK untuk Login
-NIM = 'NIM-Kamu'
-PASS = 'PASS-Kamu'
+NIM = 'NIM'
+PASS = 'PASS'
 MAX_WAIT_TIME = 20 # waktu tunggu maksimal dalam seconds
 
 # Inisialisasi variabel status untuk flow dependency
@@ -36,7 +36,7 @@ def fill_text_by_name(value_of_name, text_to_fill):
         elemen.clear()
         elemen.send_keys(text_to_fill)
     except TimeoutException:
-        print(f"Elemen dengan atribut '{atribut}'='{nilai}' tidak ditemukan atau tidak dapat diisi.")
+        print(f"Elemen dengan atribut 'NAME'='{value_of_name}' tidak ditemukan atau tidak dapat diisi.")
 
 # Fungsi untuk mencetak teks dari elemen dengan selector CSS
 def print_text_by_css(css_selector, message=""):
@@ -88,7 +88,7 @@ url_absensi = "https://simkuliah.usk.ac.id/index.php/absensi"
 
 # the interface for turning on headless mode 
 options = Options() 
-options.add_argument("-headless") 
+# options.add_argument("-headless") 
 
 # Inisialisasi Elemen
 # cara : inspect element web pages, get the button or text field, right click, copy, choose css selector or xpath or whatever you want.
@@ -136,7 +136,7 @@ try:
                     if check:
                         exit_program(check)    
                     else:
-                        mk_sekarang = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
+                        mataKuliah = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
                         info_absensi_check = get_text_by_css(info_absensi)  # dapatkan teks anda sudah absen atau belum
 
                         if mataKuliah and info_absensi_check:
@@ -175,7 +175,7 @@ try:
         
                 driver.close()
     else:
-        print("Gagal Terhubung. Coba lagi nanti.")
+        gagal = "Gagal Terhubung. Coba lagi nanti."
         exit_program(gagal)
 except WebDriverException as e:
     print("Terjadi kesalahan:", str(e))
