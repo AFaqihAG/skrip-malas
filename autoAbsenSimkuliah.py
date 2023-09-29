@@ -93,14 +93,14 @@ options.add_argument("-headless")
 # Inisialisasi Elemen
 # cara : inspect element web pages, get the button or text field, right click, copy, choose css selector or xpath or whatever you want.
 login = "div.row:nth-child(5) > div:nth-child(1) > button:nth-child(1)"  #css selector
-# absensi = ".pcoded-item > li:nth-child(2) > a:nth-child(1) > span:nth-child(2)"   #css selector
-absensi = "a[href='https://simkuliah.usk.ac.id/index.php/absensi']"
-hadir = "#konfirmasi-kehadiran" #css selector
-konfirmasi = ".confirm" #css selector
+# absensi = "a[href='https://simkuliah.usk.ac.id/index.php/absensi']"
+konfirmasi_kehadiran = "#konfirmasi-kehadiran" #css selector
+konfirmasi = "body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button"
 nama_akun = "#pcoded > div.pcoded-container.navbar-wrapper > nav > div > div.navbar-container.container-fluid > div > ul.nav-right > li.user-profile.header-notification > a > span"
 check_absen = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div > div:nth-child(1) > div > div > p"
 valid_alert = "body > section > div > div > div > div.login-card.card-block.auth-body > form > div.auth-box > div.alert.alert-danger.icons-alert"
-mk_sekarang = ""
+mk_sekarang = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div.card-header > h5"
+info_absensi = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div.card-block > div > div:nth-child(1) > div > p"
 
 
 try:
@@ -136,9 +136,30 @@ try:
                     if check:
                         exit_program(check)    
                     else:
-                        mataKuliah = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
-                        if mataKuliah:
+                        mk_sekarang = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
+                        info_absensi_check = get_text_by_css(info_absensi)  # dapatkan teks anda sudah absen atau belum
+
+                        if mataKuliah and info_absensi_check:
                             print("Mata Kuliah:", mataKuliah)
+
+                            # dapatkan kata kedua yaitu belum atau sudah dari info_absensi_check
+                            info_c = info_absensi_check.split()
+                            if (info_c[1].lower() == "belum"):
+                                click_by_css(konfirmasi_kehadiran)
+                                click_by_css(konfirmasi)
+
+                                info_absensi_check = get_text_by_css(info_absensi)  # dapatkan teks anda sudah absen atau belum
+                                info_c = info_absensi_check.split()
+                                if (info_c[1].lower() == "sudah"):
+                                    exit_program(f"Absensi {mk_sekarang}\nberhasil!")
+                                else:
+                                    exit_program(info_absensi_check)
+                            # jika selain belum
+                            else:
+                                exit_program(info_absensi_check)
+
+                        else:
+                            exit_program("Gagal mengindeks MK dan Info_absen")
     
                             # Flow untuk klik tombol hadir
                             # click_by_css(hadir, "Hadir")
