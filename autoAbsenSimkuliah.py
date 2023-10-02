@@ -7,6 +7,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 import math
 import requests
+import time
 
 # Akun USK untuk Login
 NIM = 'NIM'
@@ -88,7 +89,7 @@ url_absensi = "https://simkuliah.usk.ac.id/index.php/absensi"
 
 # the interface for turning on headless mode 
 options = Options() 
-# options.add_argument("-headless") 
+options.add_argument("-headless") 
 
 # Inisialisasi Elemen
 # cara : inspect element web pages, get the button or text field, right click, copy, choose css selector or xpath or whatever you want.
@@ -131,9 +132,9 @@ try:
                     # Flow pergi ke halaman absensi 
                     go_to_url(url_absensi)  # pergi ke halaman absensi
                     check = get_text_by_css(check_absen)    # Mendapatkan teks jika absen belum tersedia
-    
+                    
                     # Jika absen belum tersedia maka program berhenti
-                    if check:
+                    if "sudah" in check.lower():
                         exit_program(check)    
                     else:
                         mataKuliah = get_text_by_css(mk_sekarang)     # Dapatkan mata kuliah yang sedang berlangsung
@@ -145,9 +146,15 @@ try:
                             # dapatkan kata kedua yaitu belum atau sudah dari info_absensi_check
                             info_c = info_absensi_check.split()
                             if (info_c[1].lower() == "belum"):
-                                click_by_css(konfirmasi_kehadiran)
-                                click_by_css(konfirmasi)
+                                print(info_absensi_check)
+                                # click_by_css(konfirmasi_kehadiran, "konfirmasi kehadiran")
+                                # click_by_css(konfirmasi, "konfirmasi absen")
+                                time.sleep(3.0)
+                                driver.find_element(By.CSS_SELECTOR, konfirmasi_kehadiran).click()
+                                time.sleep(3.0)
+                                driver.find_element(By.CSS_SELECTOR, konfirmasi).click()
 
+                                go_to_url(url_absensi)  # pergi ke halaman absensi
                                 info_absensi_check = get_text_by_css(info_absensi)  # dapatkan teks anda sudah absen atau belum
                                 info_c = info_absensi_check.split()
                                 if (info_c[1].lower() == "sudah"):
