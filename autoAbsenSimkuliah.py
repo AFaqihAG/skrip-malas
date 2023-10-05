@@ -9,9 +9,9 @@ import requests
 import time
 
 # Akun USK untuk Login
-NIM = "2108107010072"
-PASS = "95684712"
-MAX_WAIT_TIME = 20 # waktu tunggu maksimal dalam seconds
+NIM = "0000"
+PASS = "0000"
+MAX_TIMEOUT_WAIT = 20 
 
 # the target website 
 URL_LOGIN = "https://simkuliah.usk.ac.id/index.php/login" 
@@ -35,7 +35,7 @@ INFO_ABSENSI_SELECTOR = "#pcoded > div.pcoded-container.navbar-wrapper > div > d
 
 def click_by_css(css_selector, label):
     try:
-        WebDriverWait(driver, MAX_WAIT_TIME).until(
+        WebDriverWait(driver, MAX_TIMEOUT_WAIT).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector))
         ).click()
         print(f"Tombol '{label}' di klik")
@@ -45,7 +45,7 @@ def click_by_css(css_selector, label):
 
 def fill_text_by_name(value_of_name, text_to_fill):
     try:
-        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
+        elemen = WebDriverWait(driver, MAX_TIMEOUT_WAIT).until(
             EC.presence_of_element_located((By.NAME, value_of_name))
         )
         elemen.clear()
@@ -56,7 +56,7 @@ def fill_text_by_name(value_of_name, text_to_fill):
 
 def print_text_by_css(css_selector, message=""):
     try:
-        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
+        elemen = WebDriverWait(driver, MAX_TIMEOUT_WAIT).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         )
         teks_elemen = elemen.text
@@ -67,7 +67,7 @@ def print_text_by_css(css_selector, message=""):
 
 def get_text_by_css(css_selector):
     try:
-        elemen = WebDriverWait(driver, MAX_WAIT_TIME).until(
+        elemen = WebDriverWait(driver, MAX_TIMEOUT_WAIT).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
         )
         text = elemen.text
