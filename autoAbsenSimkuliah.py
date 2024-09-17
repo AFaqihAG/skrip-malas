@@ -2,15 +2,15 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import math
 import requests
 import time
 
 # Akun USK untuk Login
-NIM = "0000"
-PASS = "0000"
+NIM = "YOUR_NIM"
+PASS = "YOUR_PASS"
 MAX_WAIT_TIME = 20 # waktu tunggu maksimal dalam seconds
 
 # the target website 
@@ -28,10 +28,10 @@ LOGIN_SELECTOR = "div.row:nth-child(5) > div:nth-child(1) > button:nth-child(1)"
 KONFIRMASI_KEHADIRAN_SELECTOR = "#konfirmasi-kehadiran"
 KONFIRMASI_SELECTOR = "body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button"
 NAMA_AKUN_SELECTOR = "#pcoded > div.pcoded-container.navbar-wrapper > nav > div > div.navbar-container.container-fluid > div > ul.nav-right > li.user-profile.header-notification > a > span"
-CHECK_ABSEN_SELECTOR = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div > div:nth-child(1) > div > div > p"
+CHECK_ABSEN_SELECTOR = ".card-block > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)"
+CHECK_ABSEN_SELECTOR2 = ".alert-info > p:nth-child(1)"
 VALID_ALERT_SELECTOR = "body > section > div > div > div > div.login-card.card-block.auth-body > form > div.auth-box > div.alert.alert-danger.icons-alert"
 MK_SEKARANG_SELECTOR = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div.card-header > h5"
-INFO_ABSENSI_SELECTOR = "#pcoded > div.pcoded-container.navbar-wrapper > div > div > div.pcoded-content > div > div > div > div.page-body > div > div > div > div.card-block > div > div:nth-child(1) > div > p"
 
 def click_by_css(css_selector, label):
     try:
@@ -99,11 +99,11 @@ def print_login_info(nama, NIM):
     print("NIM:", NIM)
     print('=' * (length + 1))
 
-def check_sudah_absensi(info_check, mataKuliah): 
-    if (info_check == "sudah"):
-        exit_program(f"Absensi {mataKuliah} berhasil!")
+def check_sudah_absensi(check_absen, mataKuliah): 
+    if "sudah" in check_absen.lower():
+        exit_program(f"Absensi ({mataKuliah}) berhasil!")
     else:
-        exit_program(f"Absensi {mataKuliah} tidak berhasil")
+        exit_program(f"Absensi ({mataKuliah}) tidak berhasil")
 
 def login_and_get_nama(username, password):
     go_to_url(URL_LOGIN)
@@ -116,24 +116,23 @@ def login_and_get_nama(username, password):
 def handle_absensi():
     go_to_url(URL_ABSENSI)
     check_absen = get_text_by_css(CHECK_ABSEN_SELECTOR)
-    
-    if "sudah" in check_absen.lower():
-        exit_program(check_absen)    
-    else:
-        mata_kuliah = get_text_by_css(MK_SEKARANG_SELECTOR)
-        info_absensi_check = get_text_by_css(INFO_ABSENSI_SELECTOR)
+    check_absen2 = get_text_by_css(CHECK_ABSEN_SELECTOR2)
 
-        if mata_kuliah:
-            print("Mata Kuliah:", mata_kuliah)
-
-            info_check = info_absensi_check.split()
-            if info_check[1].lower() == "belum":
-                print(info_absensi_check)
-                confirm_attendance(mata_kuliah)
-            else:
-                exit_program(info_absensi_check)
+    if check_absen:
+        if "belum" in check_absen.lower():
+            mata_kuliah = get_text_by_css(MK_SEKARANG_SELECTOR)
+            print("MK : ", mata_kuliah)
+            # confirm_attendance(mata_kuliah)
+        elif "sudah" in check_absen.lower():
+            exit_program(check_absen)    
         else:
-            exit_program(info_absensi_check)
+            exit_program(check_absen)
+    elif check_absen2:
+        if "waktu" in check_absen2.lower():
+            exit_program(check_absen2)
+    else:
+        exit_program('Handle Absensi Error')
+
 
 def confirm_attendance(mata_kuliah):
     time.sleep(3.0)
@@ -142,10 +141,9 @@ def confirm_attendance(mata_kuliah):
     driver.find_element(By.CSS_SELECTOR, KONFIRMASI_SELECTOR).click()
 
     go_to_url(URL_ABSENSI)
-    info_absensi_check = get_text_by_css(INFO_ABSENSI_SELECTOR)
-    info_check = info_absensi_check.split()
+    check_absen = get_text_by_css(CHECK_ABSEN_SELECTOR)
 
-    check_sudah_absensi(info_check[1].lower(), mata_kuliah)
+    check_sudah_absensi(check_absen, mata_kuliah)
 
 def main():
     if is_internet_available():
